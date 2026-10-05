@@ -25,10 +25,7 @@ int	checkphilodeath(t_data *data)
 		pthread_mutex_unlock(&data->philo_list[i].meal_mutex);
 		if (time > data->ttd)
 		{
-			print_item(&data->philo_list[i], "died\n");
-			pthread_mutex_lock(&data->end_mutex);
-			data->end_stimulation = 1;
-			pthread_mutex_unlock(&data->end_mutex);
+			print_death(&data->philo_list[i]);
 			return (1);
 		}
 		i++;
@@ -36,15 +33,33 @@ int	checkphilodeath(t_data *data)
 	return (0);
 }
 
+// prints "died" and ends the simulation atomically, so it is printed
+// exactly once and nothing can be printed after it
+void	print_death(t_philo *philo)
+{
+	t_data	*data;
+
+	data = philo->alldata;
+	pthread_mutex_lock(&data->print_flag);
+	pthread_mutex_lock(&data->end_mutex);
+	if (data->end_stimulation == 0)
+	{
+		printf("%lld %d died\n",
+			cal_time() - data->programtime, philo->id + 1);
+		data->end_stimulation = 1;
+	}
+	pthread_mutex_unlock(&data->end_mutex);
+	pthread_mutex_unlock(&data->print_flag);
+}
+
 void	*one_philo(void *arg)
 {
 	t_philo	*philo;
 
 	philo = (t_philo *)arg;
-	print_item(philo, "Philo %d has taken a first fork\n");
+	print_item(philo, "has taken a fork\n");
 	usleep(philo->alldata->ttd * 1000);
-	print_item(philo, "died\n");
-	set_data_end_simulation(philo->alldata);
+	print_death(philo);
 	return (NULL);
 }
 

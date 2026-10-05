@@ -12,10 +12,27 @@
 
 #include "philosopher.h"
 
+static int	is_valid_number(char *str)
+{
+	int	i;
+
+	i = 0;
+	if (!str[0])
+		return (0);
+	while (str[i])
+	{
+		if (!(str[i] >= '0' && str[i] <= '9'))
+			return (0);
+		i++;
+	}
+	if (i > 10 || ft_atol(str) > 2147483647)
+		return (0);
+	return (1);
+}
+
 int	validate_arg(int ac, char **av)
 {
 	int	i;
-	int	j;
 
 	i = 1;
 	if (!(ac == 5 || ac == 6))
@@ -25,15 +42,12 @@ int	validate_arg(int ac, char **av)
 	}
 	while (i < ac)
 	{
-		j = 0;
-		while (av[i][j])
-		{
-			if (!(av[i][j] >= '0' && av[i][j] <= '9'))
-				return (printf("Enter Integer Only"), 1);
-			j++;
-		}
+		if (!is_valid_number(av[i]))
+			return (printf("Enter Integer Only\n"), 1);
 		i++;
 	}
+	if (ft_atol(av[1]) == 0 || (ac == 6 && ft_atol(av[5]) == 0))
+		return (printf("Need at least 1 philosopher and 1 meal\n"), 1);
 	return (0);
 }
 

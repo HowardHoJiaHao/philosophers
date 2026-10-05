@@ -14,17 +14,13 @@
 
 void	print_item(t_philo *philo, char *str)
 {
+	pthread_mutex_lock(&philo->alldata->print_flag);
 	pthread_mutex_lock(&philo->alldata->end_mutex);
 	if (philo->alldata->end_stimulation == 0)
-	{
-		pthread_mutex_unlock(&philo->alldata->end_mutex);
-		pthread_mutex_lock(&philo->alldata->print_flag);
-		printf("%lld	Philo %d %s",
-			cal_time() - philo->alldata->programtime, philo->id, str);
-		pthread_mutex_unlock(&philo->alldata->print_flag);
-		return ;
-	}
+		printf("%lld %d %s",
+			cal_time() - philo->alldata->programtime, philo->id + 1, str);
 	pthread_mutex_unlock(&philo->alldata->end_mutex);
+	pthread_mutex_unlock(&philo->alldata->print_flag);
 }
 
 int	eatphilo2(t_philo *philo)
@@ -36,7 +32,7 @@ int	eatphilo2(t_philo *philo)
 	if (currenttime - philo->tle > philo->alldata->ttd)
 	{
 		pthread_mutex_unlock(&philo->meal_mutex);
-		set_data_end_simulation(philo->alldata);
+		print_death(philo);
 		pthread_mutex_unlock(&philo->alldata->fork_flag[philo->fork1]);
 		pthread_mutex_unlock(&philo->alldata->fork_flag[philo->fork2]);
 		return (1);
@@ -62,15 +58,14 @@ int	eatphilo(t_philo *philo)
 	if (currenttime - philo->tle > philo->alldata->ttd)
 	{
 		pthread_mutex_unlock(&philo->meal_mutex);
-		print_item(philo, "died\n");
-		set_data_end_simulation(philo->alldata);
+		print_death(philo);
 		return (1);
 	}
 	pthread_mutex_unlock(&philo->meal_mutex);
 	pthread_mutex_lock(&philo->alldata->fork_flag[philo->fork1]);
-	print_item(philo, "has taken a first fork\n");
+	print_item(philo, "has taken a fork\n");
 	pthread_mutex_lock(&philo->alldata->fork_flag[philo->fork2]);
-	print_item(philo, "has taken a second fork\n");
+	print_item(philo, "has taken a fork\n");
 	if (eatphilo2(philo))
 		return (1);
 	return (0);

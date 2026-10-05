@@ -79,6 +79,7 @@ void		thinkphilo(t_philo *philo);
 
 // checking_philo.c
 int			checkphilodeath(t_data *data);
+void		print_death(t_philo *philo);
 void		*one_philo(void *arg);
 void		checkphilo(t_data *data);
 
